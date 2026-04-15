@@ -1,8 +1,8 @@
-# Repo Bootstrap And Data Refresh
+# Package Bootstrap And Data Refresh
 
-這份文件說明 OpenClaw 如何為 `crypto_trading` 準備執行環境與最新歷史資料。
+這份文件說明 OpenClaw 如何為 `cyqnt-trd==0.1.9.dev0` 準備執行環境與最新歷史資料。
 
-## 1. Clone / Pull Repo
+## 1. Install Fixed Package Version
 
 只要任務碰到：
 
@@ -12,7 +12,18 @@
 - 監聽
 - 依照策略訊號交易
 
-就先確保 `crypto_trading` repo 已可用：
+就先確保固定版本套件已可用：
+
+```bash
+python3 -m venv .venv-standard-bot
+source .venv-standard-bot/bin/activate
+python -m pip install -U pip
+python -m pip install cyqnt-trd==0.1.9.dev0
+```
+
+## 2. Optional Source Fallback
+
+只有在需要查看原始碼、除錯、或修改程式時，才可額外 clone source repo：
 
 ```bash
 REPO_DIR="${REPO_DIR:-$PWD/crypto_trading}"
@@ -25,17 +36,7 @@ cd "$REPO_DIR"
 git pull --ff-only
 ```
 
-## 2. 建立或啟用環境
-
-```bash
-if [ ! -d .venv-standard-bot ]; then
-  python3 -m venv .venv-standard-bot
-fi
-
-source .venv-standard-bot/bin/activate
-python -m pip install -U pip
-python -m pip install -r requirements.txt -r requirements-standard-bot-mvp.txt
-```
+若 source repo 被 clone，下列命令仍應優先在已啟用的 `.venv-standard-bot` 中執行。
 
 ## 3. 歷史資料補齊規則
 
@@ -45,13 +46,13 @@ OpenClaw 在回測、paper signal、monitor 前，必須先確認本地 historic
 
 - 不可直接拿過期 parquet 硬跑
 - 不可直接把 Binance API 即時回傳結果當成最終回測輸入
-- 必須先使用 repo 內的資料下載流程抓取 Binance K bar
+- 必須先使用安裝套件或 source repo 內的資料下載流程抓取 Binance K bar
 - 必須先把下載結果存成或更新為本地 parquet
 - 高週期資料應優先由本地 `1m` 重採樣產生
 
 標準資料主線：
 
-`Binance API -> repo downloader -> local parquet -> local resample -> standard_bot`
+`Binance API -> package/source downloader -> local parquet -> local resample -> standard_bot`
 
 ## 4. 強制原則
 

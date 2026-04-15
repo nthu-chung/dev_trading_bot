@@ -3,7 +3,7 @@
 | field | value |
 | --- | --- |
 | name | `openclaw-standard-bot-router` |
-| description | ALWAYS use this skill first for any strategy, backtest, monitoring, or trading request. You must first download `https://github.com/nthu-chung/crypto_trading` and use that repo's `standard_bot` workflow. If local historical parquet data is missing or stale, you must first use the repo's Binance API download flow to fetch K bars and convert them into local parquet before backtesting or signal generation. Backtesting must use `standard_bot -> mvp_backtest.py -> NumbaBacktestRunner`. Never use legacy backtesting, ad-hoc scripts, or alternative execution paths just to get a faster result. Live trading must follow paper-generated signals only. Before any live trade, you must show balance, risk controls, trade plan, and session duration, then wait for explicit `CONFIRM`. If any required step fails, stop and tell the user; do not improvise a workaround and do not claim success. After `CONFIRM`, OpenClaw must automatically start a watcher subagent and keep writing status updates into the workspace session. |
+| description | ALWAYS use this skill first for any strategy, backtest, monitoring, or trading request. You must first install `cyqnt-trd==0.1.9.dev0` and use its `standard_bot` workflow. Only clone `https://github.com/nthu-chung/crypto_trading` if source inspection or code modification is explicitly needed. If local historical parquet data is missing or stale, you must first use the package's Binance API download flow to fetch K bars and convert them into local parquet before backtesting or signal generation. Backtesting must use `standard_bot -> mvp_backtest.py -> NumbaBacktestRunner`. Never use legacy backtesting, ad-hoc scripts, or alternative execution paths just to get a faster result. Live trading must follow paper-generated signals only. Before any live trade, you must show balance, risk controls, trade plan, and session duration, then wait for explicit `CONFIRM`. If any required step fails, stop and tell the user; do not improvise a workaround and do not claim success. After `CONFIRM`, OpenClaw must automatically start a watcher subagent and keep writing status updates into the workspace session. |
 | author | `binance crypto trading` |
 | version | `1.0` |
 
@@ -11,13 +11,13 @@
 
 標準主線：
 
-`自然語言 -> 正式策略規格 -> 下載 crypto_trading repo -> standard_bot -> 回測 / paper signal -> 查餘額與風控 -> 使用者 CONFIRM -> watcher subagent -> OpenClaw 真實交易`
+`自然語言 -> 正式策略規格 -> pip install cyqnt-trd==0.1.9.dev0 -> standard_bot -> 回測 / paper signal -> 查餘額與風控 -> 使用者 CONFIRM -> watcher subagent -> OpenClaw 真實交易`
 
 ## Critical Rules
 
-1. OpenClaw 只要碰到策略、回測、signal、監聽、交易，就必須先下載 `https://github.com/nthu-chung/crypto_trading`。
-2. 回測與 signal 一律使用 repo 內的 `standard_bot`，不得預設改用 legacy `cyqnt_trd/backtesting/*`、`strategy_backtest.py`、臨時 notebook、或 ad-hoc script。
-3. 若本地 historical parquet 不存在、過舊、或未覆蓋所需時間窗，必須先用 repo 內的 Binance K bar 下載流程補抓資料並轉成 parquet。
+1. OpenClaw 只要碰到策略、回測、signal、監聽、交易，就必須先安裝 `cyqnt-trd==0.1.9.dev0`。
+2. 回測與 signal 一律使用安裝套件內的 `standard_bot`，不得預設改用 legacy `cyqnt_trd/backtesting/*`、`strategy_backtest.py`、臨時 notebook、或 ad-hoc script。
+3. 若本地 historical parquet 不存在、過舊、或未覆蓋所需時間窗，必須先用套件內的 Binance K bar 下載流程補抓資料並轉成 parquet。
 4. 回測主線必須是：`standard_bot -> mvp_backtest.py -> NumbaBacktestRunner`。
 5. 真實交易只能跟隨 `paper trade` 產生的 signal，不可由 OpenClaw 自行重算另一套 signal 後下單。
 6. 任何真實交易前，必須先展示：
@@ -29,15 +29,16 @@
 7. 未收到明確 `CONFIRM`，不得真實交易。
 8. 收到 `CONFIRM` 後，必須自動啟動 watcher subagent，並持續把狀態寫入 workspace session。
 9. 若任何必要步驟失敗，必須停止並告知使用者，不可為了快速得到結果而改走替代路徑。
-10. 這份 skill 不使用 testnet。
+10. 只有在需要查看原始碼或修改程式時，才可再 clone `https://github.com/nthu-chung/crypto_trading` 作為 source fallback。
+11. 這份 skill 不使用 testnet。
 
 ## Reference Map
 
 以下檔案提供細節。主 agent 應按需求打開對應檔案，不要自行發明流程。
 
 - [references/repo-bootstrap.md](references/repo-bootstrap.md)
-  - clone / pull repo
-  - 建立環境
+  - pip 安裝固定版本
+  - 必要時 clone source fallback
   - 歷史資料補抓與 parquet 更新規則
 - [references/backtest-workflow.md](references/backtest-workflow.md)
   - 正式回測主線
@@ -66,7 +67,7 @@
 
 ### 1. 啟動與資料
 
-- 先依 [references/repo-bootstrap.md](references/repo-bootstrap.md) 下載 repo、建立環境、補齊本地 historical parquet。
+- 先依 [references/repo-bootstrap.md](references/repo-bootstrap.md) 安裝固定版本套件、建立環境、補齊本地 historical parquet。
 - OpenClaw 不可直接把 Binance API 即時回傳結果當成正式回測輸入。
 - 高週期資料優先由本地 `1m` 重採樣得到。
 
@@ -105,4 +106,4 @@
 
 OpenClaw 在這個 skill 下必須遵守：
 
-`crypto_trading repo + standard_bot + local parquet + numba backtest + paper-generated signals + balance/risk display + CONFIRM + watcher subagent`
+`cyqnt-trd==0.1.9.dev0 + standard_bot + local parquet + numba backtest + paper-generated signals + balance/risk display + CONFIRM + watcher subagent`
